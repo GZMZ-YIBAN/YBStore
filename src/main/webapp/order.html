@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>doing</title>
+    <link rel="shortcut icon" href="img/tittle.png" type="image/x-icon">
+    <link rel="Bookmark" href="img/tittle.png" />
+    <link rel="icon" href="img/tittle.png" type="image/gif" >
+</head>
+<body>
+    <h1>正在处理请稍后，请勿关闭此页面。。。完成后自动跳转。。</h1>
+
+<script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+<script>
+    (function ($) {
+        $.getUrlParam = function (name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]);
+            return null;
+        }
+    })(jQuery);
+
+    $(function () {
+        var toData = {
+            "end_time":$.getUrlParam("end_time"),
+            "trade_end":$.getUrlParam("trade_end"),
+            "trade_id":$.getUrlParam("trade_id"),
+            "yb_sign":$.getUrlParam("yb_sign"),
+        };
+        var url = "/YBStore/order";
+        $.ajax({
+            type: "post",
+            url: url,
+            data: toData,
+            dataType: "json",
+            success: function (data) {
+                window.location.href="https://oauth.yiban.cn/code/html?client_id=c3ae2d27d5fe89b5&" +
+                    "redirect_uri=http://f.yiban.cn/iapp213531&state=YBStore";
+            },
+            error: function (data) {
+                alert("严重错误！支付成功但未成功存入库中！请截图联系易班客服！");
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class name="entity.YibanProductGetEntity" table="yiban_product_get" schema="yiban">
+        <id name="id">
+            <column name="id" sql-type="int(11)"/>
+        </id>
+        <property name="userName">
+            <column name="`userName`" sql-type="varchar(255)"/>
+        </property>
+        <property name="yibanId">
+            <column name="`yibanId`" sql-type="varchar(255)"/>
+        </property>
+        <property name="sex">
+            <column name="`sex`" sql-type="varchar(255)"/>
+        </property>
+        <property name="phone">
+            <column name="`phone`" sql-type="varchar(255)"/>
+        </property>
+        <property name="price">
+            <column name="`price`" sql-type="int(10)"/>
+        </property>
+        <property name="num">
+            <column name="`num`" sql-type="int(255)"/>
+        </property>
+        <property name="img">
+            <column name="`img`" sql-type="varchar(255)" not-null="true"/>
+        </property>
+        <property name="enable">
+            <column name="`enable`" sql-type="int(11)" not-null="true"/>
+        </property>
+        <property name="productName">
+            <column name="`productName`" sql-type="varchar(255)"/>
+        </property>
+        <property name="date">
+            <column name="`date`" sql-type="timestamp"/>
+        </property>
+    </class>
+</hibernate-mapping>

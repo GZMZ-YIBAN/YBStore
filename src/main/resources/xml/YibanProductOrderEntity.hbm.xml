@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class name="entity.YibanProductOrderEntity" table="yiban_product_order" schema="yiban">
+        <id name="id">
+            <column name="id" sql-type="int(11)"/>
+        </id>
+        <property name="productId">
+            <column name="`productId`" sql-type="varchar(255)"/>
+        </property>
+        <property name="tradeId">
+            <column name="`tradeId`" sql-type="varchar(255)"/>
+        </property>
+        <property name="userId">
+            <column name="`userId`" sql-type="varchar(255)"/>
+        </property>
+        <property name="userName">
+            <column name="`userName`" sql-type="varchar(255)"/>
+        </property>
+        <property name="sex">
+            <column name="`sex`" sql-type="varchar(255)"/>
+        </property>
+        <property name="phone">
+            <column name="`phone`" sql-type="varchar(255)"/>
+        </property>
+        <property name="accessToken">
+            <column name="`access_token`" sql-type="varchar(255)"/>
+        </property>
+        <property name="enable">
+            <column name="`enable`" sql-type="varchar(255)"/>
+        </property>
+        <property name="data">
+            <column name="`data`" sql-type="timestamp"/>
+        </property>
+    </class>
+</hibernate-mapping>

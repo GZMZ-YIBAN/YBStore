@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+    <context:property-placeholder location="classpath:properties/*.properties" file-encoding="UTF-8"/>
+    <bean name="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driverClass}" />
+        <property name="jdbcUrl" value="${jdbc.jdbcUrl}" />
+        <property name="user" value="${jdbc.user}" />
+        <property name="password" value="${jdbc.password}" />
+        <property name="initialPoolSize" value="${jdbc.initialPoolSize}" />
+        <property name="maxIdleTime" value="${jdbc.maxIdleTime}"/>
+        <property name="maxPoolSize" value="${jdbc.maxPoolSize}"/>
+        <property name="minPoolSize" value="${jdbc.minPoolSize}"/>
+    </bean>
+    <!--<context:property-placeholder location="classpath*:properties/redis.properties"/>-->
+    <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig" >
+        <property name="maxIdle" value="${redis.maxIdle}" />
+        <property name="maxWaitMillis" value="${redis.maxWait}" />
+        <property name="testOnBorrow" value="${redis.testOnBorrow}" />
+    </bean >
+    <bean id="connectionFactory"  class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory" >
+        <property name="poolConfig" ref="poolConfig" />
+        <property name="port" value="${redis.port}" />
+        <property name="hostName" value="${redis.host}" />
+        <property name="password" value="${redis.password}" />
+        <property name="timeout" value="${redis.timeout}" />
+    </bean >
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate" >
+        <property name="connectionFactory" ref="connectionFactory" />
+        <property name="keySerializer" >
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+        </property>
+        <property name="valueSerializer" >
+            <bean class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer" />
+        </property>
+    </bean >
+    <bean id="redisUtil" class="utils.redis.RedisUtil" >
+        <property name="redisTemplate" ref="redisTemplate" />
+    </bean >
+
+
+    <bean name="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean" >
+        <property name="dataSource" ref="dataSource" />
+        <property name="configLocation" value="classpath:hibernate.cfg.xml"/>
+    </bean>
+    <bean name="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="transfer" isolation="DEFAULT" propagation="REQUIRED" read-only="false"/>
+            <tx:method name="save*" isolation="DEFAULT" propagation="REQUIRED" read-only="false"/>
+            <tx:method name="decrease*" isolation="DEFAULT" propagation="REQUIRED" read-only="false"/>
+            <tx:method name="update*" isolation="DEFAULT" propagation="REQUIRED" read-only="false"/>
+            <tx:method name="delete*" isolation="DEFAULT" propagation="REQUIRED" read-only="false"/>
+            <tx:method name="remove*" isolation="DEFAULT" propagation="REQUIRED" read-only="false"/>
+            <tx:method name="get*" isolation="DEFAULT" propagation="REQUIRED" read-only="true"/>
+            <tx:method name="find*" isolation="DEFAULT" propagation="REQUIRED" read-only="true"/>
+            <tx:method name="query*" isolation="DEFAULT" propagation="REQUIRED" read-only="true"/>
+            <tx:method name="pay*" isolation="DEFAULT" propagation="REQUIRED" read-only="false"/>
+            <tx:method name="toPay*" isolation="DEFAULT" propagation="REQUIRED" read-only="false"/>
+        </tx:attributes>
+    </tx:advice>
+    <aop:config proxy-target-class="true">
+        <aop:pointcut id="txPc" expression="execution(* service.impl.*ServiceImpl.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="txPc"/>
+    </aop:config>
+
+
+    <bean id="productDao" class="dao.impl.ProductDaoImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    <bean class="dao.impl.UserDaoImpl" id="userDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <bean class="dao.impl.OrderDaoImpl" id="orderDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <bean class="service.impl.UserServiceImpl" id="findByUserService">
+        <property name="userDao" ref="userDao"/>
+        <property name="redisUtil" ref="redisUtil"/>
+    </bean>
+
+    <bean id="productService" class="service.impl.ProductServiceImpl">
+        <property name="productDao" ref="productDao"/>
+        <property name="redisUtil" ref="redisUtil"/>
+        <property name="orderDao" ref="orderDao"/>
+        <property name="userDao" ref="userDao"/>
+    </bean>
+
+    <bean class="web.action.FindByUserAction" id="findByUserAction" scope="prototype">
+        <property name="userService" ref="findByUserService"/>
+        <property name="redisUtil" ref="redisUtil"/>
+        <property name="admin" value="${yiban.admin}"/>
+    </bean>
+    <bean id="productAction" class="web.action.ProductAction" scope="prototype">
+        <property name="productService" ref="productService"/>
+        <property name="redisUtil" ref="redisUtil"/>
+    </bean>
+    <bean class="web.action.PayAction" id="payAction" scope="prototype">
+        <property name="productService" ref="productService"/>
+        <property name="payUser" value="${yiban.pay_user}"/>
+        <property name="orderService" ref="orderService"/>
+    </bean>
+    <bean class="web.action.OrderAction" id="orderAciton" scope="prototype">
+        <property name="redisUtil" ref="redisUtil"/>
+        <property name="productService" ref="productService"/>
+        <property name="findByUserService" ref="findByUserService"/>
+        <property name="tip1" value="${yiban.tip1}"/>
+        <property name="tip2" value="${yiban.tip2}" />
+        <property name="orderService" ref="orderService"/>
+    </bean>
+    <bean class="dao.Base.impl.BaseDaoImpl" id="baseDao">
+        <property name="mySessionFactory" ref="sessionFactory"/>
+    </bean>
+    <bean class="service.impl.OrderServiceImpl" id="orderService">
+        <property name="orderDao" ref="orderDao"/>
+        <property name="productDao" ref="productDao"/>
+    </bean>
+</beans>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Info</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/info.css">
+    <link rel="icon" type="image/x-icon" href="img/YBStore.ico"/>
+    <link rel="Shortcut Icon" href="img/YBStore.ico">
+    <link rel="shortcut icon" href="img/YBStore.ico" type="image/x-icon"/>
+    <script src="js/ali.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+    <script src="js/jquery.md5.js"></script>
+    <script>
+        (function ($) {
+            $.getUrlParam = function (name) {
+                var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+                var r = window.location.search.substr(1).match(reg);
+                if (r != null) return unescape(r[2]);
+                return null;
+            }
+        })(jQuery);
+        $(function () {
+            var pId = {
+                'pId': $.getUrlParam('pId')
+            };
+            console.log(pId);
+            $.ajax({
+                type: "post",
+                url: "/YBStore/findPro",
+                data: pId,
+                dataType: "json",
+                async: false,
+                success: function (data) {
+                    var pro = $.parseJSON($.parseJSON(data.product).product);
+                    console.log(pro);
+                    var status = pro.enable > 0 ? "已兑换" : "未兑换";
+                    if (status === "已兑换"){
+                        $('.tip').remove();
+                        $('.ojbk').remove();
+                    }
+                    var sex = (pro.sex == 'M') ? "帅哥" : "美女";
+                    $('.title').after("<div class='flexBwn row'>\n" +
+                        "                <div class='row-col'>兑换用户</div>\n" +
+                        "                <div class='row-col'>" + pro.userName +"</div>\n" +
+                        "            </div>\n" +
+                        "            <div class='flexBwn row'>\n" +
+                        "                <div class='row-col'>商品名称</div>\n" +
+                        "                <div class='row-col'>" + pro.productName + "</div>\n" +
+                        "            </div>\n" +
+                        "            <div class='flexBwn row'>\n" +
+                        "                <div class='row-col'>已 支 付</div>\n" +
+                        "                <div class='row-col'> "+ pro.price + "网薪</div>\n" +
+                        "            </div>\n" +
+                        "            <div class='flexBwn row'>\n" +
+                        "                <div class='row-col red'>兑换状态</div>\n" +
+                        "                <div class='row-col red'>" + status + "</div>\n" +
+                        "            </div>\n" +
+                        "\n" +
+                        "            <div class='flexBwn row'>\n" +
+                        "                <div class='row-col'>兑换ID</div>\n" +
+                        "                <div class='row-col'>" + pro.yibanId + "</div>\n" +
+                        "            </div>\n" +
+                        "            <div class='flexBwn row'>\n" +
+                        "                <div class='row-col'>联系电话</div>\n" +
+                        "                <div class='row-col'>" + pro.phone + "</div>\n" +
+                        "            </div>" +
+                        "            <div class='flexBwn row'>\n" +
+                        "                <div class='row-col'>属性</div>\n" +
+                        "                <div class='row-col'>" + sex + "</div>\n" +
+                        "            </div>"+
+                        "            <div class='flexBwn row'>\n" +
+                        "                <div class='row-col'>兑换时间</div>\n" +
+                        "                <div class='row-col'>" + pro.date + "</div>\n" +
+                        "            </div>" )
+                },
+                error: function (data) {
+                    console.log(data.status);
+                    console.log(data);
+                    if (data.status === 612){
+                        alert("612,查找用户需要兑换的当前商品时，获取商品出现异常");
+                    }
+                }
+            });
+        });
+
+    </script>
+</head>
+
+<body>
+    <div class="flexCen flexCol tip disNo">
+        <div class="tip-head flexCen ">
+            请输入管理员密码
+        </div>
+        <div class="tip-main">
+            <input type="password" placeholder="password" />
+            <button>提交</button>
+        </div>
+    </div>
+    <div class="box">
+        <div class="info flexCen flexCol">
+            <div class="title">欢迎兑换</div>
+            <div class="flexCen ojbk">
+                兑换成功
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="http://cdn.webfont.youziku.com/wwwroot/js/wf/youziku.api.min.js"></script>
+    <script type="text/javascript">
+        $youziku.load("body", "dbc3e1ea13144f6cb784d86f826b16f0", "cyjianxk");
+        $youziku.draw();
+        $('.ojbk').click(function(){
+            $('.tip').removeClass("disNo");
+        });
+        $('body').on('click','.tip-main button',function () {
+           var data = {
+               "pId" : $.getUrlParam('pId'),
+               "password" : $.md5($('.tip-main input').val())
+           };
+            $.ajax({
+                type: "post",
+                url: "/YBStore/submit",
+                data: data,
+                dataType: "json",
+                async: true,
+                success: function (data) {
+                    alert("ok");
+                },
+                error: function (data) {
+                    alert(data.status);
+                    if (data.status === 613){
+                        alert("613,密码错误");
+                    } else if (data.status === 614){
+                        alert("614,商品状态更改出现异常")
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

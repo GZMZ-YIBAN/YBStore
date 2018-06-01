@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+    <constant name="struts.devMode" value="false"/>
+    <constant name="struts.enable.DynamicMethodInvocation" value="false"/>
+    <constant name="struts.i18n.encoding" value="UTF-8"/>
+    <constant name="struts.objectFactory" value="spring"/>
+
+    <package name="product" namespace="/" extends="struts-default,json-default">
+        <interceptors>
+            <interceptor name="loginInter" class="web.interceptor.LoginInterceptor"/>
+            <interceptor-stack name="loginStack">
+                <interceptor-ref name="loginInter">
+                    <param name="includeMethods">
+                        queryList,execute
+                    </param>
+                </interceptor-ref>
+                <interceptor-ref name="defaultStack"/>
+            </interceptor-stack>
+        </interceptors>
+        <default-interceptor-ref name="loginStack"/>
+        <global-results>
+            <result name="reLogin" type="json">
+                <param name="errorCode">401</param>
+            </result>
+            <result name="errorLogin" type="json">
+                <param name="errorCode">500</param>
+            </result>
+        </global-results>
+        <global-exception-mappings>
+            <exception-mapping exception="java.lang.Exception" result="reLogin"/>
+            <exception-mapping exception="java.lang.NullPointerException" result="reLogin"/>
+        </global-exception-mappings>
+
+        <action name="queryList" class="productAction" method="queryList">
+            <result type="json" name="success">
+                <param name="result">result</param>
+                <param name="user">user</param>
+            </result>
+            <result type="json" name="error1">
+                <param name="errorCode">502</param>
+            </result>
+            <result type="json" name="error2">
+                <param name="errorCode">503</param>
+            </result>
+            <allowed-methods>queryList</allowed-methods>
+        </action>
+
+        <action name="userList" class="findByUserAction" method="execute">
+            <result type="json" name="success">
+                <param name="productUserList">productUserList</param>
+            </result>
+            <result type="json" name="error">
+                <param name="errorCode">609</param>
+            </result>
+            <result type="json" name="error1">
+                <param name="errorCode">610</param>
+            </result>
+            <allowed-methods>execute</allowed-methods>
+        </action>
+
+        <action name="findPro" class="findByUserAction" method="findProduct">
+            <result type="json" name="success">
+                <param name="product">
+                    product
+                </param>
+            </result>
+            <result type="json" name="error">
+                <param name="errorCode">
+                    611
+                </param>
+            </result>
+            <result type="json" name="error1">
+                <param name="errorCode">
+                    612
+                </param>
+            </result>
+            <allowed-methods>findProduct</allowed-methods>
+        </action>
+
+        <action name="submit" class="findByUserAction" method="submit">
+            <result type="json" name="success">
+                <param name="root">root</param>
+            </result>
+            <result type="json" name="error">
+                <param name="errorCode">613</param>
+            </result>
+            <result type="json" name="error1">
+                <param name="errorCode">614</param>
+            </result>
+        </action>
+
+        <action name="pay" class="payAction" method="pay">
+            <result type="json" name="success">
+                <param name="subRes">subRes</param>
+            </result>
+            <result type="json" name="error">
+                <param name="errorCode">501</param>
+            </result>
+            <result type="json" name="error0">
+                <param name="errorCode">600</param>
+            </result>
+            <result type="json" name="error1">
+                <param name="errorCode">601</param>
+            </result>
+            <result type="json" name="error2">
+                <param name="errorCode">602</param>
+            </result>
+            <result type="json" name="error3">
+                <param name="errorCode">603</param>
+            </result>
+            <result type="json" name="error4">
+                <param name="errorCode">604</param>
+            </result>
+            <result type="json" name="error5">
+                <param name="errorCode">605</param>
+            </result>
+            <result type="json" name="error6">
+                <param name="errorCode">606</param>
+            </result>
+            <result type="json" name="error7">
+                <param name="errorCode">607</param>
+            </result>
+            <allowed-methods>execute</allowed-methods>
+        </action>
+
+        <action name="order" class="orderAciton" method="getOrder">
+            <result name="success">
+                /login.html
+            </result>
+            <result name="error" type="json">
+                <param name="errorCode">510</param>
+            </result>
+        </action>
+
+    </package>
+
+</struts>
